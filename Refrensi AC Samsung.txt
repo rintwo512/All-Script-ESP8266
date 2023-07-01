@@ -1,0 +1,4 @@
+https://github.com/crankyoldgit/IRremoteESP8266/blob/d8960688ce63772768055e0ea2132ad311d56683/src/ir_Samsung.cpp#L835
+
+
+https://github.com/crankyoldgit/IRremoteESP8266/issues/1675

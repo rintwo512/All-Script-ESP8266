@@ -1,0 +1,131 @@
+#include <Arduino.h>
+
+#define BLYNK_TEMPLATE_ID "TMPL1ov1xbJZ"
+#define BLYNK_DEVICE_NAME "Smart Home"
+#define BLYNK_AUTH_TOKEN "bG6ROuRQ4qPRS_3TOy3l5__kOvtGR7-4"
+
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+// #include <DHT_U.h>
+
+char auth[] = BLYNK_AUTH_TOKEN;
+
+// set the LCD number of columns and rows
+int lcdColumns = 16;
+int lcdRows = 2;
+
+LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);
+
+char ssid[] = "RH";         // type your wifi name
+char pass[] = "makassar92"; // type your wifi password
+
+#define DHTPIN D5     // Mention the digital pin where you connected
+#define DHTTYPE DHT11 // DHT 11
+DHT dht(DHTPIN, DHTTYPE);
+BlynkTimer timer;
+
+int h = 50;
+int t = 25;
+
+void setup()
+{
+    Serial.begin(115200);
+
+    // timer.setInterval(2500L, sendSensor);
+    pinMode(2, OUTPUT); // Initialise digital pin 2 as an output pin
+    pinMode(0, OUTPUT); // Initialise digital pin 2 as an output pin
+
+    Blynk.begin(auth, ssid, pass);
+    dht.begin();
+    Wire.begin();
+    // initialize LCD
+    lcd.init();
+    // turn on LCD backlight
+    lcd.backlight();
+    lcd.print("RINTO");
+    lcd.setCursor(0, 1);
+    lcd.print("Smart Home");
+    delay(2000);
+    lcd.clear();
+}
+
+// void sendSensor()
+// {
+// float t = dht.readTemperature(); // or dht.readTemperature(true) for Fahrenheit
+// float h = dht.readHumidity();
+
+// if (t > 30)
+// {
+
+//   Blynk.logEvent("notifku", "Suhu diatas 30 Derajat celcius");
+// }
+// }
+
+BLYNK_WRITE(V0) // Executes when the value of virtual pin 0 changes
+{
+    if (param.asInt() == 1)
+    {
+        // execute this code if the switch widget is now ON
+        digitalWrite(2, HIGH); // Set digital pin 2 HIGH
+    }
+    else
+    {
+        // execute this code if the switch widget is now OFF
+        digitalWrite(2, LOW); // Set digital pin 2 LOW
+    }
+}
+
+BLYNK_WRITE(V1)
+{
+    if (param.asInt() == 1)
+    {
+
+        digitalWrite(0, HIGH);
+    }
+    else
+    {
+
+        digitalWrite(0, LOW);
+    }
+}
+
+void loop()
+{
+
+    Blynk.run();
+    timer.run();
+
+    if (isnan(t))
+    {
+        Serial.println("Sensor Temperature Error!");
+        return;
+    }
+
+    if (isnan(h))
+    {
+        Serial.println("Sensor Humidity Error!");
+        return;
+    }
+
+    Blynk.virtualWrite(V2, t);
+    Blynk.virtualWrite(V3, h);
+
+    Serial.print("Suhu : ");
+    Serial.print(t);
+    Serial.print("|| Kelembapan : ");
+    Serial.println(h);
+
+    lcd.setCursor(0, 0);
+    lcd.print("Temp : ");
+    lcd.print(t);
+    lcd.print("Deg");
+    lcd.setCursor(0, 1);
+    lcd.print("Humididt : ");
+    lcd.print(h);
+    lcd.print("%");
+}

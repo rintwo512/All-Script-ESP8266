@@ -1,0 +1,35 @@
+#include <Arduino.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Daikin.h>
+
+const uint16_t kIrLed = 16; // ESP8266 GPIO pin to use. Recommended: 4 (D2).
+IRDaikin176 ac(kIrLed); // Set the GPIO to be used to sending the message
+
+void setup() {
+ac.begin();
+Serial.begin(115200);
+}
+
+void loop() {
+Serial.println("Sending...");
+
+// Set up what we want to send. See ir_Daikin.cpp for all the options.
+ac.on();
+ac.setFan(kDaikinFanMax);
+ac.setMode(kDaikin176Cool);
+ac.setTemp(24);
+ac.setSwingHorizontal(kDaikin176SwingHOff);
+// Display what we are going to send.
+SERIALPLN(ac.toString());
+// Now send the IR signal.
+ac.send();
+
+// Display what we are going to send.
+Serial.println(ac.toString());
+
+// Now send the IR signal.
+#if SEND_DAIKIN176
+ac.send();
+#endif // SEND_DAIKIN176
+}

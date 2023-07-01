@@ -1,0 +1,63 @@
+#include <Arduino.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Samsung.h>
+
+const uint16_t kIrLed = 4;  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
+IRSamsungAc ac(kIrLed);     // Set the GPIO used for sending messages.
+
+void printState() {
+  // Display the settings.
+  Serial.println("Samsung A/C remote is in the following state:");
+  Serial.printf("  %s\n", ac.toString().c_str());
+}
+
+void setup() {
+  ac.begin();
+  Serial.begin(115200);
+  delay(2000);
+
+  // Set up what we want to send. See ir_Samsung.cpp for all the options.
+  Serial.println("Default state of the remote.");
+  printState();
+  Serial.println("Setting initial state for A/C.");
+  ac.off();
+  ac.setFan(kSamsungAcFanTurbo);
+  ac.setMode(kSamsungAcCool);
+  ac.setTemp(25);
+  ac.setSwing(false);
+  printState();
+}
+
+void loop() {
+  ac.on();
+  ac.send();
+  printState();
+  delay(3000);
+  
+  ac.setFan(kSamsungAcFanAuto);
+  ac.send();
+  printState();
+  delay(3000);
+
+  ac.setFan(kSamsungAcFanLow);
+  ac.send();
+  printState();
+  delay(3000);
+
+  ac.setFan(kSamsungAcFanMed);
+  ac.send();
+  printState();
+  delay(3000);
+
+
+  ac.setFan(kSamsungAcFanHigh);
+  ac.send();
+  printState();
+  delay(3000);
+  
+  ac.setFan(kSamsungAcFanTurbo);
+  ac.send();
+  printState();
+  delay(3000);
+}
